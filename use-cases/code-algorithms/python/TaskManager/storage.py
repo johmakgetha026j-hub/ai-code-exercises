@@ -99,3 +99,7 @@ class TaskStorage:
     def get_overdue_tasks(self):
         return [task for task in self.tasks.values() if task.is_overdue()]
 
+    def get_abandoned_tasks(self):
+        """Get all tasks that meet the abandoned criteria."""
+        return [task for task in self.tasks.values() if task.is_abandoned()]
+

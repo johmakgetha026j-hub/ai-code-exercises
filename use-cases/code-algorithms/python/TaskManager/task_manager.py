@@ -84,6 +84,25 @@ class TaskManager:
             return True
         return False
 
+    def get_abandoned_tasks(self):
+        """Get all tasks that should be marked as abandoned."""
+        return self.storage.get_abandoned_tasks()
+
+    def mark_abandoned_tasks(self):
+        """
+        Automatically mark tasks as abandoned based on business rule.
+        Tasks overdue for more than 7 days and NOT high priority will be tagged.
+        Returns count of tasks marked as abandoned.
+        """
+        abandoned_tasks = self.get_abandoned_tasks()
+        count = 0
+        for task in abandoned_tasks:
+            if "abandoned" not in task.tags:
+                task.tags.append("abandoned")
+                self.storage.save()
+                count += 1
+        return count
+
     def get_statistics(self):
         tasks = self.storage.get_all_tasks()
         total = len(tasks)
@@ -101,6 +120,9 @@ class TaskManager:
         # Count overdue
         overdue_count = len([task for task in tasks if task.is_overdue()])
 
+        # Count abandoned
+        abandoned_count = len([task for task in tasks if task.is_abandoned()])
+
         # Count completed in last 7 days
         seven_days_ago = datetime.now() - timedelta(days=7)
         completed_recently = len([
@@ -113,6 +135,7 @@ class TaskManager:
             "by_status": status_counts,
             "by_priority": priority_counts,
             "overdue": overdue_count,
+            "abandoned": abandoned_count,
             "completed_last_week": completed_recently
         }
 

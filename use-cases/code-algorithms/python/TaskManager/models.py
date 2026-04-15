@@ -44,3 +44,19 @@ class Task:
         if not self.due_date:
             return False
         return self.due_date < datetime.now() and self.status != TaskStatus.DONE
+
+    def is_abandoned(self):
+        """
+        Check if task should be considered abandoned.
+        A task is abandoned if:
+        - It is overdue for more than 7 days AND
+        - It is not HIGH or URGENT priority AND
+        - It has not been completed
+        """
+        if self.status == TaskStatus.DONE or not self.due_date:
+            return False
+        
+        days_overdue = (datetime.now() - self.due_date).days
+        is_high_priority = self.priority in (TaskPriority.HIGH, TaskPriority.URGENT)
+        
+        return days_overdue > 7 and not is_high_priority
